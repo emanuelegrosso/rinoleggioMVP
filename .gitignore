@@ -134,8 +134,8 @@ DocProject/Help/*.hhp
 DocProject/Help/Html2
 DocProject/Help/html
 
-# Click-Once directory
-publish/
+# Click-Once / publish output at repository root only (not etc/publish docs)
+/publish/
 
 # Publish Web Output
 *.[Pp]ublish.xml
