@@ -6,4 +6,10 @@
 **/.temp-build
 **/Logs
 **/appsettings.secrets.json
-Rinoleggio.db*
+*.db-wal
+*.db-shm
+Rinoleggio.db.bak-*
+Rinoleggio.db.fly-*
+etc/backups/
+etc/publish/smoke-data/
+!Rinoleggio.db
