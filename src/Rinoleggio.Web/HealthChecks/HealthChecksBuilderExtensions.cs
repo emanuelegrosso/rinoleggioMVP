@@ -26,13 +26,13 @@ public static class HealthChecksBuilderExtensions
             healthCheckUrl = "/health-status";
         }
 
-        var healthChecksUiBuilder = services.AddHealthChecksUI(settings =>
-        {
-            settings.AddHealthCheckEndpoint("Rinoleggio Health Status", configuration["App:HealthUiCheckUrl"] ?? healthCheckUrl);
-        });
+        //var healthChecksUiBuilder = services.AddHealthChecksUI(settings =>
+        //{
+        //    settings.AddHealthCheckEndpoint("Rinoleggio Health Status", configuration["App:HealthUiCheckUrl"] ?? healthCheckUrl);
+        //});
 
-        // Set your HealthCheck UI Storage here
-        healthChecksUiBuilder.AddInMemoryStorage();
+        //// Set your HealthCheck UI Storage here
+        //healthChecksUiBuilder.AddInMemoryStorage();
 
         services.MapHealthChecksUiEndpoints(options =>
         {

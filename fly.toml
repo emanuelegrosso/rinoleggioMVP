@@ -1,11 +1,9 @@
-# LEGACY: deploy from repository root. Use src/fly.toml and `fly deploy` from src/.
+# fly.toml for rinoleggioMVP — https://fly.io/docs/reference/configuration/
 
 app = 'rinoleggiomvp'
 primary_region = 'ams'
 
 [build]
-  dockerfile = "Dockerfile"
-  ignorefile = ".dockerignore"
 
 [env]
   ASPNETCORE_ENVIRONMENT = 'Production'
