@@ -1,0 +1,9 @@
+.home-hero {
+    min-height: 50vh;
+    display: flex;
+    align-items: center;
+}
+
+.home-hero .display-5 {
+    letter-spacing: -0.02em;
+}
