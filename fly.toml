@@ -4,6 +4,8 @@ app = 'rinoleggiomvp'
 primary_region = 'ams'
 
 [build]
+  dockerfile = "Dockerfile"
+  ignorefile = ".dockerignore"
 
 [env]
   ASPNETCORE_ENVIRONMENT = 'Production'

@@ -1,35 +1,55 @@
 # Deploy su Fly.io (rinoleggioMVP)
 
-App prevista: **`rinoleggiomvp`** → `https://rinoleggiomvp.fly.dev`
+App: **`rinoleggiomvp`** → https://rinoleggiomvp.fly.dev
 
-SQLite persiste su volume **`rinoleggio_data`** montato in `/data`. Al primo avvio, se `/data/Rinoleggio.db` non esiste, l’entrypoint copia il seed dall’immagine (`Rinoleggio.db` in repo).
+## Sorgente deploy (obbligatorio: root repo)
 
-## Primo setup (una tantum)
+Build e `fly.toml` devono partire dalla **root** del repository (cartella con `Dockerfile`, `Rinoleggio.db`, `fly.toml`).
+
+Su Fly.io → app **rinoleggiomvp** → **Settings** → collegamento GitHub:
+
+| Impostazione | Valore |
+|--------------|--------|
+| **Root directory** | `.` (vuoto o root del repo, **non** `src`) |
+| **Dockerfile** | `Dockerfile` (alla root) |
+
+Deploy da CLI (equivalente):
 
 ```powershell
 cd C:\EG\Rinoleggio\MVP\Rinoleggio4\Rinoleggio
-fly apps create rinoleggiomvp
-fly volumes create rinoleggio_data --region ams --size 1 -a rinoleggiomvp
-fly secrets set App__SelfUrl="https://rinoleggiomvp.fly.dev" AuthServer__Authority="https://rinoleggiomvp.fly.dev" -a rinoleggiomvp
 fly deploy -a rinoleggiomvp
 ```
 
-Se un deploy precedente ha lasciato un DB vuoto sul volume:
+> `src/fly.toml` non va usato per il deploy: era solo per contesti `src/` senza seed DB. Usare il `fly.toml` in root.
+
+SQLite su volume **`rinoleggio_data`** → `/data`. L’entrypoint copia il seed da `/app/seed/Rinoleggio.db` se il file sul volume manca o è vuoto.
+
+## Setup volume (una tantum)
 
 ```powershell
-fly ssh console -a rinoleggiomvp -C "rm -f /data/Rinoleggio.db"
-fly apps restart rinoleggiomvp
+fly scale count 1 -a rinoleggiomvp
+fly volumes create rinoleggio_data --region ams --size 1 -a rinoleggiomvp
+fly secrets set App__SelfUrl="https://rinoleggiomvp.fly.dev" AuthServer__Authority="https://rinoleggiomvp.fly.dev" -a rinoleggiomvp
+```
+
+## DB vuoto sul volume (0 byte)
+
+Dopo un deploy da `src/` senza seed, cancellare e ridistribuire immagine root:
+
+```powershell
+fly ssh console -a rinoleggiomvp -C "rm -f /data/Rinoleggio.db /data/Rinoleggio.db-wal /data/Rinoleggio.db-shm"
+fly deploy -a rinoleggiomvp
 ```
 
 ## Verifica
 
 ```powershell
+fly ssh console -a rinoleggiomvp -C "ls -la /app/seed/Rinoleggio.db"
 fly ssh console -a rinoleggiomvp -C "ls -la /data/Rinoleggio.db"
-fly logs -a rinoleggiomvp
 ```
 
-Il file dovrebbe essere ~800 KB. Nei log non deve comparire `no such table: AbpBackgroundJobs`.
+Entrambi ~800 KB. Health check interno (opzionale): secret `App__HealthUiCheckUrl=http://127.0.0.1:8080/health-status`.
 
 ## OpenIddict
 
-Se login/redirect falliscono, aggiornare gli URL client nel SQLite (`OpenIddictApplications`) per puntare a `https://rinoleggiomvp.fly.dev` (vedi script SQL di esempio nel vecchio repo o eseguire aggiornamento via DbMigrator/SQL su volume).
+Se login/redirect falliscono, aggiornare gli URL in `OpenIddictApplications` per `https://rinoleggiomvp.fly.dev`.
