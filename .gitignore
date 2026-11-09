@@ -288,6 +288,9 @@ tempkey.jwk
 # Local deploy / SQLite artifacts (MVP)
 publish-smoke/
 /publish/
+/Rinoleggio.db
+/Rinoleggio.db-wal
+/Rinoleggio.db-shm
 *.db-wal
 *.db-shm
 Rinoleggio.db.bak-*

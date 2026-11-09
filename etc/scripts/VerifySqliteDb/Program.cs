@@ -2,7 +2,7 @@ using Microsoft.Data.Sqlite;
 
 var db = args.Length > 0
     ? args[0]
-    : Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "Rinoleggio.db"));
+    : Path.GetFullPath(Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "..", "..", "src", "Rinoleggio.db"));
 
 using var c = new SqliteConnection($"Data Source={db}");
 c.Open();

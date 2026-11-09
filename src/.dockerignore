@@ -1,0 +1,11 @@
+.git
+**/.vs
+**/bin
+**/obj
+**/.temp-build
+**/Logs
+**/appsettings.secrets.json
+*.db-wal
+*.db-shm
+Rinoleggio.db.bak-*
+**/node_modules

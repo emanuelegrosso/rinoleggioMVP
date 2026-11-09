@@ -2,54 +2,46 @@
 
 App: **`rinoleggiomvp`** → https://rinoleggiomvp.fly.dev
 
-## Sorgente deploy (obbligatorio: root repo)
+## Un solo database
 
-Build e `fly.toml` devono partire dalla **root** del repository (cartella con `Dockerfile`, `Rinoleggio.db`, `fly.toml`).
+- File canonico in git: **`src/Rinoleggio.db`** (locale = Fly).
+- Nessun volume SQLite, nessuno seed/entrypoint: il Dockerfile fa `COPY Rinoleggio.db` → `/app/Rinoleggio.db`.
+- Production: `Data Source=/app/Rinoleggio.db;` in `appsettings.Production.json`.
 
-Su Fly.io → app **rinoleggiomvp** → **Settings** → collegamento GitHub:
+Aggiornare Fly = committare `src/Rinoleggio.db` (solo il file principale, no wal/shm) + deploy.
+
+## Fly.io + GitHub
 
 | Impostazione | Valore |
 |--------------|--------|
-| **Root directory** | `.` (vuoto o root del repo, **non** `src`) |
-| **Dockerfile** | `Dockerfile` (alla root) |
+| **Root directory** | **`src`** |
+| **Dockerfile** | `Dockerfile` (in `src/`) |
 
-Deploy da CLI (equivalente):
+Deploy CLI:
 
 ```powershell
-cd C:\EG\Rinoleggio\MVP\Rinoleggio4\Rinoleggio
+cd C:\EG\Rinoleggio\MVP\Rinoleggio4\Rinoleggio\src
 fly deploy -a rinoleggiomvp
 ```
-
-> `src/fly.toml` non va usato per il deploy: era solo per contesti `src/` senza seed DB. Usare il `fly.toml` in root.
-
-SQLite su volume **`rinoleggio_data`** → `/data`. L’entrypoint copia il seed da `/app/seed/Rinoleggio.db` se il file sul volume manca o è vuoto.
-
-## Setup volume (una tantum)
 
 ```powershell
 fly scale count 1 -a rinoleggiomvp
-fly volumes create rinoleggio_data --region ams --size 1 -a rinoleggiomvp
-fly secrets set App__SelfUrl="https://rinoleggiomvp.fly.dev" AuthServer__Authority="https://rinoleggiomvp.fly.dev" -a rinoleggiomvp
-```
-
-## DB vuoto sul volume (0 byte)
-
-Dopo un deploy da `src/` senza seed, cancellare e ridistribuire immagine root:
-
-```powershell
-fly ssh console -a rinoleggiomvp -C "rm -f /data/Rinoleggio.db /data/Rinoleggio.db-wal /data/Rinoleggio.db-shm"
-fly deploy -a rinoleggiomvp
 ```
 
 ## Verifica
 
 ```powershell
-fly ssh console -a rinoleggiomvp -C "ls -la /app/seed/Rinoleggio.db"
-fly ssh console -a rinoleggiomvp -C "ls -la /data/Rinoleggio.db"
+fly ssh console -a rinoleggiomvp -C "ls -la /app/Rinoleggio.db"
 ```
 
-Entrambi ~800 KB. Health check interno (opzionale): secret `App__HealthUiCheckUrl=http://127.0.0.1:8080/health-status`.
+~800 KB. Log senza `AbpBackgroundJobs` / `unable to open database file`.
+
+Opzionale: `fly secrets set App__HealthUiCheckUrl=http://127.0.0.1:8080/health-status -a rinoleggiomvp`
+
+## Root repo
+
+`fly.toml` e `Dockerfile` nella root del repo sono legacy (deploy da root non usato). Usare sempre **`src/`**.
 
 ## OpenIddict
 
-Se login/redirect falliscono, aggiornare gli URL in `OpenIddictApplications` per `https://rinoleggiomvp.fly.dev`.
+Se login fallisce, aggiornare redirect in SQLite per `https://rinoleggiomvp.fly.dev`.
