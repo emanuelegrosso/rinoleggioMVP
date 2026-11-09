@@ -16,6 +16,11 @@ primary_region = 'ams'
   min_machines_running = 1
   processes = ['app']
 
+[mounts]
+  source = 'rinoleggio_data'
+  destination = '/data'
+  initial_size = '1gb'
+
 [[vm]]
   memory = '1gb'
   cpu_kind = 'shared'
